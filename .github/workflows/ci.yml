@@ -1,0 +1,123 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  check-formatting:
+    name: Check Nix Formatting
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install Nix
+        uses: cachix/install-nix-action@v26
+        with:
+          nix_path: nixpkgs=channel:nixos-unstable
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+      
+      - name: Check formatting
+        run: |
+          nix fmt -- --check .
+
+  lint:
+    name: Lint Nix Code
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install Nix
+        uses: cachix/install-nix-action@v26
+        with:
+          nix_path: nixpkgs=channel:nixos-unstable
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+      
+      - name: Run statix
+        run: |
+          nix develop --command statix check .
+      
+      - name: Run deadnix
+        run: |
+          nix develop --command deadnix --fail .
+
+  flake-check:
+    name: Nix Flake Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install Nix
+        uses: cachix/install-nix-action@v26
+        with:
+          nix_path: nixpkgs=channel:nixos-unstable
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+      
+      - name: Flake check
+        run: |
+          nix flake check --all-systems
+
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install Nix
+        uses: cachix/install-nix-action@v26
+        with:
+          nix_path: nixpkgs=channel:nixos-unstable
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+      
+      - name: Run test suite
+        run: |
+          chmod +x tests/run-tests.sh
+          nix develop --command ./tests/run-tests.sh
+
+  build-examples:
+    name: Build Examples
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        example:
+          - basic
+          - advanced
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install Nix
+        uses: cachix/install-nix-action@v26
+        with:
+          nix_path: nixpkgs=channel:nixos-unstable
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+      
+      - name: Evaluate example
+        run: |
+          nix eval --impure --expr '
+            let
+              nixpkgs = builtins.getFlake "nixpkgs";
+              system = builtins.currentSystem;
+              pkgs = nixpkgs.legacyPackages.${system};
+              lib = pkgs.lib;
+              config = {
+                home.homeDirectory = "/home/testuser";
+              };
+              mcpModule = import ./modules/default.nix { inherit config lib pkgs; };
+              exampleConfig = import ./examples/${{ matrix.example }}.nix;
+              evaluated = lib.evalModules {
+                modules = [
+                  mcpModule
+                  exampleConfig
+                  { _module.args = { inherit config lib pkgs; }; }
+                ];
+              };
+            in
+              evaluated.config.services.mcp.enable
+          '

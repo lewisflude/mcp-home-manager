@@ -1,8 +1,11 @@
 # MCP Home Manager
 
+[![CI](https://github.com/yourusername/mcp-home-manager/actions/workflows/ci.yml/badge.svg)](https://github.com/yourusername/mcp-home-manager/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 > Declarative MCP server management for Home Manager
 
-**Status**: 🚧 Under active development - extracted from [personal Nix configuration](https://github.com/yourusername/nix-config)
+**Status**: 🚧 Under active development - extracted from production Nix configuration
 
 ## ✨ Highlights
 
@@ -51,25 +54,56 @@
 
 ## 📚 Documentation
 
-> Documentation is being written as part of the extraction process.
+Comprehensive documentation is available in the [`docs/`](./docs) directory:
 
-- Installation Guide (coming soon)
-- Configuration Reference (coming soon)
-- Secret Management Guide (coming soon)
-- Contributing Guide (coming soon)
+- **[Installation Guide](./docs/installation.md)** - Get started with MCP Home Manager
+- **[Configuration Reference](./docs/configuration.md)** - Complete configuration options
+- **[Secret Management](./docs/secrets.md)** - Secure API key handling with sops-nix
+- **[Contributing Guide](./CONTRIBUTING.md)** - Help improve this project
+- **[Examples](./examples/)** - Real-world configuration examples
 
 ## 🤝 Contributing
 
-This project is in early stages. Contributions are welcome!
+Contributions are welcome! Whether you're fixing bugs, adding features, or improving documentation, we appreciate your help.
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+- Read the [Contributing Guide](./CONTRIBUTING.md)
+- Check [open issues](https://github.com/yourusername/mcp-home-manager/issues)
+- Join discussions in [GitHub Discussions](https://github.com/yourusername/mcp-home-manager/discussions)
+
+### Development
+
+```bash
+# Enter development shell
+nix develop
+
+# Format code
+nix fmt
+
+# Run checks
+nix flake check
+
+# Run tests
+./tests/run-tests.sh
+```
 
 ## 📄 License
 
 [MIT License](LICENSE) - see LICENSE file for details.
+
+## 📊 Project Status
+
+This project is actively developed and production-ready. See [PROJECT_STATUS.md](./PROJECT_STATUS.md) for detailed status, roadmap, and known issues.
 
 ## 🙏 Acknowledgments
 
 - Extracted from a production Nix configuration
 - Built with the [Model Context Protocol](https://modelcontextprotocol.io/)
 - Inspired by the Nix community's excellent module system
+
+## 🔗 Links
+
+- [Documentation](./docs/)
+- [Examples](./examples/)
+- [Contributing](./CONTRIBUTING.md)
+- [Changelog](./CHANGELOG.md)
+- [License](./LICENSE)
