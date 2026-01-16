@@ -5,3 +5,7 @@ result-*
 *.swp
 *.swo
 *~
+
+# Logs
+logs/
+*.log

@@ -1,0 +1,56 @@
+name: Update Flake
+
+on:
+  schedule:
+    # Run weekly on Monday at 00:00 UTC
+    - cron: '0 0 * * 1'
+  workflow_dispatch: # Allow manual trigger
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update-flake:
+    name: Update flake.lock
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install Nix
+        uses: cachix/install-nix-action@v26
+        with:
+          nix_path: nixpkgs=channel:nixos-unstable
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+      
+      - name: Update flake.lock
+        run: |
+          nix flake update
+      
+      - name: Run checks
+        id: checks
+        continue-on-error: true
+        run: |
+          nix flake check --all-systems
+          nix develop --command ./tests/run-tests.sh
+      
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: 'chore: update flake.lock'
+          title: 'chore: update flake.lock'
+          body: |
+            Automated weekly update of flake.lock
+            
+            ## Test Results
+            ${{ steps.checks.outcome == 'success' && '✅ All checks passed' || '⚠️ Some checks failed - review before merging' }}
+            
+            This PR updates all flake inputs to their latest versions.
+            Please review the changes and ensure compatibility.
+          branch: update-flake-lock
+          delete-branch: true
+          labels: |
+            dependencies
+            automated
