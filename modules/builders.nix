@@ -1,13 +1,15 @@
 # MCP Server Builder Functions
-{ pkgs
-, lib
-, ...
+{
+  pkgs,
+  lib,
+  secretsPath ? "/run/secrets",
+  ...
 }:
 let
   inherit (lib) optionalAttrs;
 
   # Simple secret wrapper - one function instead of four builders
-  # Secrets are deployed to /run/secrets/ with group ownership (admin on macOS, sops-secrets on Linux)
+  # Secrets are expected to be readable files in the configured secretsPath directory
   # We check at runtime, not build time, so wrappers always work if secret exists
   wrapWithSecret =
     name: cmd: secretName:
@@ -21,17 +23,17 @@ let
         EXPECTED_GROUP="sops-secrets"
       fi
 
-      # Secrets are in /run/secrets/ with group ownership
-      SECRET_PATH="/run/secrets/${secretName}"
+      # Check for secret in configured path
+      SECRET_PATH="${secretsPath}/${secretName}"
       if [ ! -r "$SECRET_PATH" ]; then
         # Graceful degradation: log warning but exit successfully
         # This prevents MCP client crashes when secrets are temporarily unavailable
         echo "Warning: ${name} MCP server disabled - ${secretName} secret not available" >&2
         echo "Secret not found or not readable at $SECRET_PATH" >&2
         echo "To enable this server:" >&2
-        echo "  1. Ensure you're in the '$EXPECTED_GROUP' group: $(id -Gn | tr ' ' ',')" >&2
-        echo "  2. Configure secret in SOPS (secrets/secrets.yaml)" >&2
-        echo "  3. Rebuild system and restart MCP client" >&2
+        echo "  1. Ensure the secret file exists at $SECRET_PATH" >&2
+        echo "  2. Ensure you have read permissions (current groups: $(id -Gn | tr ' ' ','))" >&2
+        echo "  3. Rebuild and restart MCP client" >&2
         exit 0  # Exit gracefully to prevent connection closed errors
       fi
 

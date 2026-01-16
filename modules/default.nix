@@ -17,10 +17,11 @@
 #   1. Configure secret in SOPS (secrets/secrets.yaml)
 #   2. Enable server in platform config (home/{nixos,darwin}/mcp.nix)
 #   3. Rebuild system
-{ config
-, lib
-, pkgs
-, ...
+{
+  config,
+  lib,
+  pkgs,
+  ...
 }:
 let
   inherit (lib)
@@ -46,7 +47,10 @@ let
 
   # Import sub-modules
   serverTypes = import ./types.nix { inherit lib; };
-  builders = import ./builders.nix { inherit pkgs lib; };
+  builders = import ./builders.nix {
+    inherit pkgs lib;
+    secretsPath = cfg.secretsPath;
+  };
   defaultServers = import ./servers/default.nix { inherit config pkgs; };
 
   inherit (serverTypes) serverType;
@@ -60,28 +64,24 @@ let
       filterUserOverrides = userCfg: lib.filterAttrs (_: v: v != null && v != [ ] && v != { }) userCfg;
 
       # Start with defaults, merge in user overrides (only non-null values)
-      mergedDefaults = lib.mapAttrs
-        (
-          name: defaultCfg:
-            if lib.hasAttr name cfg.servers then
-              let
-                userOverrides = filterUserOverrides cfg.servers.${name};
-              in
-              defaultCfg // userOverrides # Merge only non-null user overrides into default
-            else
-              defaultCfg
-        )
-        defaultServers;
+      mergedDefaults = lib.mapAttrs (
+        name: defaultCfg:
+        if lib.hasAttr name cfg.servers then
+          let
+            userOverrides = filterUserOverrides cfg.servers.${name};
+          in
+          defaultCfg // userOverrides # Merge only non-null user overrides into default
+        else
+          defaultCfg
+      ) defaultServers;
       # Add any user-defined servers not in defaults
       userOnlyServers = lib.filterAttrs (name: _: !(lib.hasAttr name defaultServers)) cfg.servers;
     in
     mergedDefaults // userOnlyServers;
 
-  activeServers = filterAttrs
-    (
-      _name: server: (server.enabled or true) # Default to enabled if not specified
-    )
-    mergedServers;
+  activeServers = filterAttrs (
+    _name: server: (server.enabled or true) # Default to enabled if not specified
+  ) mergedServers;
 
   # Generate the MCP configuration JSON
   mcpConfig = {
@@ -94,6 +94,45 @@ in
 {
   options.services.mcp = {
     enable = mkEnableOption "MCP (Model Context Protocol) server configuration";
+
+    secretsPath = mkOption {
+      type = types.path;
+      default = "/run/secrets";
+      example = "/run/secrets-for-users";
+      description = ''
+        Path to the directory containing secret files.
+
+        Secrets are expected to be readable files named after the secret
+        (e.g., GITHUB_TOKEN, OPENAI_API_KEY).
+
+        Common values:
+        - /run/secrets (default, for sops-nix with NixOS)
+        - /run/secrets-for-users (for user-readable secrets)
+        - /run/agenix (for agenix)
+        - Custom path for other secret management solutions
+      '';
+    };
+
+    clients = mkOption {
+      type = types.listOf (
+        types.enum [
+          "cursor"
+          "claude-desktop"
+        ]
+      );
+      default = [
+        "cursor"
+        "claude-desktop"
+      ];
+      example = [ "cursor" ];
+      description = ''
+        Which MCP clients to configure.
+
+        - "cursor": Generates ~/.cursor/mcp.json
+        - "claude-desktop": Generates Claude Desktop configuration
+          (platform-specific: ~/.config/claude on Linux, ~/Library/Application Support/Claude on macOS)
+      '';
+    };
 
     _generatedServers = mkOption {
       type = types.attrs;
@@ -161,17 +200,19 @@ in
       # Install Node.js for NPM-based servers
       packages = [ pkgs.nodejs ];
 
-      # Generate config files
-      file = {
-        # Cursor configuration
-        ".cursor/mcp.json".text = configJson;
+      # Generate config files based on enabled clients
+      file =
+        (lib.optionalAttrs (builtins.elem "cursor" cfg.clients) {
+          # Cursor configuration
+          ".cursor/mcp.json".text = configJson;
+        })
+        // (lib.optionalAttrs (builtins.elem "claude-desktop" cfg.clients) {
+          # Claude Desktop App configuration
+          "${claudeConfigDir}/claude_desktop_config.json".text = configJson;
+        });
 
-        # Claude Desktop App configuration
-        "${claudeConfigDir}/claude_desktop_config.json".text = configJson;
-
-        # Note: Claude Code CLI uses programs.claude-code.mcpServers instead
-        # See home/common/apps/claude-code.nix
-      };
+      # Note: Claude Code CLI uses programs.claude-code.mcpServers instead
+      # Configure via services.mcp._generatedServers
 
       # Activation message with secret validation
       activation.mcpStatus = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
@@ -191,7 +232,7 @@ in
             ${
               if (server.secret or null) != null then
                 ''
-                  if [ -r "/run/secrets/${server.secret}" ]; then
+                  if [ -r "${cfg.secretsPath}/${server.secret}" ]; then
                     echo "  • ${name}"
                     SERVERS_OK=$((SERVERS_OK + 1))
                   else
@@ -215,8 +256,8 @@ in
               ${
                 if (server.secret or null) != null then
                   ''
-                    if [ ! -r "/run/secrets/${server.secret}" ]; then
-                      echo "  • ${name} (needs ${server.secret})"
+                    if [ ! -r "${cfg.secretsPath}/${server.secret}" ]; then
+                      echo "  • ${name} (needs ${server.secret} at ${cfg.secretsPath})"
                     fi
                   ''
                 else
@@ -226,13 +267,13 @@ in
           )}
           echo
           echo "These servers will exit gracefully and won't cause MCP errors."
-          echo "Configure secrets in SOPS and rebuild to enable them."
+          echo "Configure secrets at ${cfg.secretsPath} and rebuild to enable them."
         fi
 
         echo
         echo "Configuration files:"
-        echo "  • Cursor: ~/.cursor/mcp.json"
-        echo "  • Claude: ${claudeConfigDir}/claude_desktop_config.json"
+        ${lib.optionalString (builtins.elem "cursor" cfg.clients) ''echo "  • Cursor: ~/.cursor/mcp.json"''}
+        ${lib.optionalString (builtins.elem "claude-desktop" cfg.clients) ''echo "  • Claude Desktop: ${claudeConfigDir}/claude_desktop_config.json"''}
         echo
         echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
         echo
