@@ -156,8 +156,8 @@ See [Configuration Reference](./configuration.md) for complete details.
 
 ## 🐛 Getting Help
 
-- **Bug reports**: [GitHub Issues](https://github.com/yourusername/mcp-home-manager/issues)
-- **Questions**: [GitHub Discussions](https://github.com/yourusername/mcp-home-manager/discussions)
+- **Bug reports**: [GitHub Issues](https://github.com/lewisflude/mcp-home-manager/issues)
+- **Questions**: [GitHub Discussions](https://github.com/lewisflude/mcp-home-manager/discussions)
 - **Security issues**: Email maintainers (see main README)
 
 ## 📝 Contributing to Documentation

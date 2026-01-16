@@ -1,6 +1,6 @@
 # MCP Home Manager
 
-[![CI](https://github.com/yourusername/mcp-home-manager/actions/workflows/ci.yml/badge.svg)](https://github.com/yourusername/mcp-home-manager/actions/workflows/ci.yml)
+[![CI](https://github.com/lewisflude/mcp-home-manager/actions/workflows/ci.yml/badge.svg)](https://github.com/lewisflude/mcp-home-manager/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 > Declarative MCP server management for Home Manager
@@ -19,7 +19,7 @@
 
 ```nix
 {
-  inputs.mcp-home-manager.url = "github:yourusername/mcp-home-manager";
+  inputs.mcp-home-manager.url = "github:lewisflude/mcp-home-manager";
 
   outputs = { self, nixpkgs, home-manager, mcp-home-manager, ... }: {
     homeConfigurations.youruser = home-manager.lib.homeManagerConfiguration {
@@ -67,8 +67,8 @@ Comprehensive documentation is available in the [`docs/`](./docs) directory:
 Contributions are welcome! Whether you're fixing bugs, adding features, or improving documentation, we appreciate your help.
 
 - Read the [Contributing Guide](./CONTRIBUTING.md)
-- Check [open issues](https://github.com/yourusername/mcp-home-manager/issues)
-- Join discussions in [GitHub Discussions](https://github.com/yourusername/mcp-home-manager/discussions)
+- Check [open issues](https://github.com/lewisflude/mcp-home-manager/issues)
+- Join discussions in [GitHub Discussions](https://github.com/lewisflude/mcp-home-manager/discussions)
 
 ### Development
 

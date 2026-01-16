@@ -24,7 +24,7 @@ Add MCP Home Manager as an input to your `flake.nix`:
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    mcp-home-manager.url = "github:yourusername/mcp-home-manager";
+    mcp-home-manager.url = "github:lewisflude/mcp-home-manager";
   };
 
   outputs = { self, nixpkgs, home-manager, mcp-home-manager, ... }: {

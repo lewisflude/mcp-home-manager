@@ -162,8 +162,8 @@ MCP Home Manager is a Nix module for declaratively managing MCP (Model Context P
 
 We welcome contributions! See:
 - [CONTRIBUTING.md](./CONTRIBUTING.md) - How to contribute
-- [Issues](https://github.com/yourusername/mcp-home-manager/issues) - Bug reports and features
-- [Discussions](https://github.com/yourusername/mcp-home-manager/discussions) - Questions and ideas
+- [Issues](https://github.com/lewisflude/mcp-home-manager/issues) - Bug reports and features
+- [Discussions](https://github.com/lewisflude/mcp-home-manager/discussions) - Questions and ideas
 
 ## Roadmap
 
@@ -199,8 +199,8 @@ We welcome contributions! See:
 ## Support
 
 - **Documentation**: [docs/](./docs/)
-- **Issues**: [GitHub Issues](https://github.com/yourusername/mcp-home-manager/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/yourusername/mcp-home-manager/discussions)
+- **Issues**: [GitHub Issues](https://github.com/lewisflude/mcp-home-manager/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/lewisflude/mcp-home-manager/discussions)
 
 ---
 
