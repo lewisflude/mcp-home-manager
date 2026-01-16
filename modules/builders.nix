@@ -1,9 +1,8 @@
 # MCP Server Builder Functions
-{
-  pkgs,
-  lib,
-  secretsPath ? "/run/secrets",
-  ...
+{ pkgs
+, lib
+, secretsPath ? "/run/secrets"
+, ...
 }:
 let
   inherit (lib) optionalAttrs;

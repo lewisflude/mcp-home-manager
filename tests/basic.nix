@@ -13,16 +13,18 @@ let
         services.mcp.enable = true;
 
         # Mock required home-manager options
-        home.homeDirectory = "/home/testuser";
-        home.packages = [ ];
-        home.file = { };
-        home.activation = { };
+        home = {
+          homeDirectory = "/home/testuser";
+          packages = [ ];
+          file = { };
+          activation = { };
+        };
       }
     ];
   };
 
   # Extract the config
-  config = eval.config;
+  inherit (eval) config;
 
 in
 pkgs.runCommand "mcp-basic-test"

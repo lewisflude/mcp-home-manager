@@ -25,33 +25,45 @@ test_config() {
     local test_expr
     test_expr=$(cat <<EOF
 let
-  nixpkgs = builtins.getFlake "nixpkgs";
+  nixpkgs = builtins.getFlake "github:NixOS/nixpkgs/nixos-unstable";
   system = builtins.currentSystem;
   pkgs = nixpkgs.legacyPackages.\${system};
-
-  # Minimal home-manager-like config
   lib = pkgs.lib;
-  config = {
-    home.homeDirectory = "/home/testuser";
-  };
-
-  # Import the module
-  mcpModule = import ${PROJECT_DIR}/modules/default.nix { inherit config lib pkgs; };
 
   # Import the test config
   testConfig = import ${config_file};
 
-  # Merge configs
-  finalConfig = lib.recursiveUpdate config (testConfig // {
-    _module.args = { inherit config lib pkgs; };
-  });
+  # Mock home-manager module that provides necessary options
+  mockHomeManager = {
+    options = {
+      home.homeDirectory = lib.mkOption {
+        type = lib.types.str;
+        default = "/home/testuser";
+      };
+      home.packages = lib.mkOption {
+        type = lib.types.listOf lib.types.package;
+        default = [];
+      };
+      home.file = lib.mkOption {
+        type = lib.types.attrsOf lib.types.anything;
+        default = {};
+      };
+      home.activation = lib.mkOption {
+        type = lib.types.attrsOf lib.types.anything;
+        default = {};
+      };
+    };
+  };
 
   # Evaluate the module with the test config
   evaluated = lib.evalModules {
     modules = [
-      mcpModule
+      mockHomeManager
+      ${PROJECT_DIR}/modules/default.nix
       testConfig
-      { _module.args = { inherit config lib pkgs; }; }
+      {
+        _module.args = { inherit pkgs; };
+      }
     ];
   };
 in

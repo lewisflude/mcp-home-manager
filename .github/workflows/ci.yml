@@ -102,20 +102,40 @@ jobs:
         run: |
           nix eval --impure --expr '
             let
-              nixpkgs = builtins.getFlake "nixpkgs";
+              nixpkgs = builtins.getFlake "github:NixOS/nixpkgs/nixos-unstable";
               system = builtins.currentSystem;
               pkgs = nixpkgs.legacyPackages.${system};
               lib = pkgs.lib;
-              config = {
-                home.homeDirectory = "/home/testuser";
-              };
-              mcpModule = import ./modules/default.nix { inherit config lib pkgs; };
               exampleConfig = import ./examples/${{ matrix.example }}.nix;
+              
+              # Mock home-manager module that provides necessary options
+              mockHomeManager = {
+                options = {
+                  home.homeDirectory = lib.mkOption {
+                    type = lib.types.str;
+                    default = "/home/testuser";
+                  };
+                  home.packages = lib.mkOption {
+                    type = lib.types.listOf lib.types.package;
+                    default = [];
+                  };
+                  home.file = lib.mkOption {
+                    type = lib.types.attrsOf lib.types.anything;
+                    default = {};
+                  };
+                  home.activation = lib.mkOption {
+                    type = lib.types.attrsOf lib.types.anything;
+                    default = {};
+                  };
+                };
+              };
+              
               evaluated = lib.evalModules {
                 modules = [
-                  mcpModule
+                  mockHomeManager
+                  ./modules/default.nix
                   exampleConfig
-                  { _module.args = { inherit config lib pkgs; }; }
+                  { _module.args = { inherit pkgs; }; }
                 ];
               };
             in

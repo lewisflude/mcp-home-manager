@@ -17,11 +17,10 @@
 #   1. Configure secret in SOPS (secrets/secrets.yaml)
 #   2. Enable server in platform config (home/{nixos,darwin}/mcp.nix)
 #   3. Rebuild system
-{
-  config,
-  lib,
-  pkgs,
-  ...
+{ config
+, lib
+, pkgs
+, ...
 }:
 let
   inherit (lib)
@@ -49,7 +48,7 @@ let
   serverTypes = import ./types.nix { inherit lib; };
   builders = import ./builders.nix {
     inherit pkgs lib;
-    secretsPath = cfg.secretsPath;
+    inherit (cfg) secretsPath;
   };
   defaultServers = import ./servers/default.nix { inherit config pkgs; };
 
@@ -64,24 +63,28 @@ let
       filterUserOverrides = userCfg: lib.filterAttrs (_: v: v != null && v != [ ] && v != { }) userCfg;
 
       # Start with defaults, merge in user overrides (only non-null values)
-      mergedDefaults = lib.mapAttrs (
-        name: defaultCfg:
-        if lib.hasAttr name cfg.servers then
-          let
-            userOverrides = filterUserOverrides cfg.servers.${name};
-          in
-          defaultCfg // userOverrides # Merge only non-null user overrides into default
-        else
-          defaultCfg
-      ) defaultServers;
+      mergedDefaults = lib.mapAttrs
+        (
+          name: defaultCfg:
+            if lib.hasAttr name cfg.servers then
+              let
+                userOverrides = filterUserOverrides cfg.servers.${name};
+              in
+              defaultCfg // userOverrides # Merge only non-null user overrides into default
+            else
+              defaultCfg
+        )
+        defaultServers;
       # Add any user-defined servers not in defaults
       userOnlyServers = lib.filterAttrs (name: _: !(lib.hasAttr name defaultServers)) cfg.servers;
     in
     mergedDefaults // userOnlyServers;
 
-  activeServers = filterAttrs (
-    _name: server: (server.enabled or true) # Default to enabled if not specified
-  ) mergedServers;
+  activeServers = filterAttrs
+    (
+      _name: server: (server.enabled or true) # Default to enabled if not specified
+    )
+    mergedServers;
 
   # Generate the MCP configuration JSON
   mcpConfig = {

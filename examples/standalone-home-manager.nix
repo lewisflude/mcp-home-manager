@@ -3,7 +3,7 @@
 # This example shows how to use MCP Home Manager with standalone Home Manager
 # (not integrated into NixOS or nix-darwin)
 
-{ config, pkgs, ... }:
+{ ... }:
 
 {
   # This goes in your home.nix or equivalent
