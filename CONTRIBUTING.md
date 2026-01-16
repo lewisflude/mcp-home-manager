@@ -6,7 +6,7 @@ Thank you for your interest in contributing! This document provides guidelines a
 
 1. **Fork and Clone**
    ```bash
-   git clone https://github.com/yourusername/mcp-home-manager
+   git clone https://github.com/lewisflude/mcp-home-manager
    cd mcp-home-manager
    ```
 

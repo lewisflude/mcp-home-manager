@@ -384,7 +384,7 @@ Here's a complete example with sops-nix:
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     home-manager.url = "github:nix-community/home-manager";
     sops-nix.url = "github:Mic92/sops-nix";
-    mcp-home-manager.url = "github:yourusername/mcp-home-manager";
+    mcp-home-manager.url = "github:lewisflude/mcp-home-manager";
   };
 
   outputs = { nixpkgs, home-manager, sops-nix, mcp-home-manager, ... }: {

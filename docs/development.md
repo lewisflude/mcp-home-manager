@@ -7,7 +7,7 @@ This guide covers the development workflow, architecture, and best practices for
 ### 1. Clone and Enter Development Environment
 
 ```bash
-git clone https://github.com/yourusername/mcp-home-manager
+git clone https://github.com/lewisflude/mcp-home-manager
 cd mcp-home-manager
 nix develop
 ```
@@ -345,8 +345,8 @@ See [CONTRIBUTING.md](../CONTRIBUTING.md) for release procedures.
 
 ## Getting Help
 
-- **Questions** → [GitHub Discussions](https://github.com/yourusername/mcp-home-manager/discussions)
-- **Bugs** → [GitHub Issues](https://github.com/yourusername/mcp-home-manager/issues)
+- **Questions** → [GitHub Discussions](https://github.com/lewisflude/mcp-home-manager/discussions)
+- **Bugs** → [GitHub Issues](https://github.com/lewisflude/mcp-home-manager/issues)
 - **Nix help** → [NixOS Discourse](https://discourse.nixos.org/)
 - **MCP help** → [MCP Discord](https://discord.gg/modelcontextprotocol)
 
