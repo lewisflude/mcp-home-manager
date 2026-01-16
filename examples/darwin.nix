@@ -2,7 +2,7 @@
 #
 # This example shows how to integrate MCP Home Manager with nix-darwin
 
-{ config, pkgs, ... }:
+{ ... }:
 
 {
   # Import Home Manager darwin module

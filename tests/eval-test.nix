@@ -1,7 +1,7 @@
 # Simple evaluation test that imports the module and tests various configurations
-{
-  pkgs ? import <nixpkgs> { },
-  lib ? pkgs.lib,
+{ pkgs ? import <nixpkgs> { }
+, lib ? pkgs.lib
+,
 }:
 
 let
@@ -88,8 +88,7 @@ let
     {
       inherit name;
       enabled = mcpCfg.enable;
-      secretsPath = mcpCfg.secretsPath;
-      clients = mcpCfg.clients;
+      inherit (mcpCfg) secretsPath clients;
       serverCount = lib.length (lib.attrNames mcpCfg._generatedServers);
       hasGenerated = mcpCfg._generatedServers != { };
     };

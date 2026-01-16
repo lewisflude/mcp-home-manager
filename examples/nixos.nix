@@ -2,7 +2,7 @@
 #
 # This example shows how to integrate MCP Home Manager with NixOS
 
-{ config, pkgs, ... }:
+{ config, ... }:
 
 {
   # Import Home Manager NixOS module
